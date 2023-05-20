@@ -1,14 +1,15 @@
 /// <reference types="Cypress" />
 
 describe('contact form', () => {
-  it('should submit the form', () => {
-    cy.visit('http://localhost:5173/about');
-    cy.get('[data-cy="contact-input-message"]').type('This is a test');
-    cy.get('[data-cy="contact-input-name"]').type('John Doe');
-    cy.get('[data-cy="contact-input-email"]').type('test@email.com');
+  beforeEach(() => {
+    cy.visit('/about');
+    cy.getById('contact-btn-submit').as('submitBtn');
+  });
 
-    // Get Submit Button
-    cy.get('[data-cy="contact-btn-submit"]').as('submitBtn');
+  it('should submit the form', () => {
+    cy.getById('contact-input-message').type('This is a test');
+    cy.getById('contact-input-name').type('John Doe');
+    cy.getById('contact-input-email').type('test@email.com');
 
     // Check Initial Condition Of Button
     cy.get('@submitBtn')
@@ -16,21 +17,18 @@ describe('contact form', () => {
       .and('not.have.attr', 'disabled');
 
     //Check Condition Of Button After Click
-    cy.get('@submitBtn').click();
+    cy.submitForm();
     cy.get('@submitBtn').contains('Sending...').and('have.attr', 'disabled');
   });
 
   it('should validate the form input', () => {
-    cy.visit('http://localhost:5173/about');
-    cy.get('[data-cy="contact-btn-submit"]')
-      .as('submitBtn')
-      .click()
-      .should((el) => {
-        expect(el).to.not.have.attr('disabled');
-        expect(el.text()).to.not.equal('Sending...');
-      });
+    cy.submitForm();
+    cy.get('@submitBtn').should((el) => {
+      expect(el).to.not.have.attr('disabled');
+      expect(el.text()).to.not.equal('Sending...');
+    });
 
-    cy.get('[data-cy="contact-input-message"]')
+    cy.getById('contact-input-message')
       .as('messageInput')
       .focus()
       .blur()
@@ -39,7 +37,7 @@ describe('contact form', () => {
         expect(el.attr('class')).to.contain('invalid');
       });
 
-    cy.get('[data-cy="contact-input-name"]')
+    cy.getById('contact-input-name')
       .as('nameInput')
       .focus()
       .blur()
@@ -48,7 +46,7 @@ describe('contact form', () => {
         expect(el.attr('class')).to.contain('invalid');
       });
 
-    cy.get('[data-cy="contact-input-email"]')
+    cy.getById('contact-input-email')
       .as('emailInput')
       .focus()
       .blur()
